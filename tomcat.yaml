@@ -1,23 +1,23 @@
----
-- hosts: all
-  remote_user: root
-  tasks:
-    - name: "copy files to remote host"
-      copy:
-        src={{ item.src }}
-        dest={{ item.dest }}
-      with_items:
-        - src: /usr/local/src/jdk-8u162-linux-x64.rpm
-          dest: /usr/local/
-        - src: /usr/local/src/apache-tomcat-8.0.38.tar.gz
-          dest: /usr/local/
-    - name: "install jdk"
-      yum:
-        name: /usr/local/jdk-8u162-linux-x64.rpm
-        state: present
-    - name: "install tomcat8"
-      shell: cd /usr/local/ && tar xf apache-tomcat-8.0.38.tar.gz
-    - name: "rename file"
-      shell: mv /usr/local/apache-tomcat-8.0.38 /usr/local/tomcat8
-    - name: "start tomcat"
-      shell: 'nohup /usr/local/tomcat8/bin/startup.sh &'
+ ---
+ 4 - hosts: all
+ 5   remote_user: root
+ 6   vars:
+ 7     tomcat_version: 8.5.38
+ 8     tomcat_install_dir: /opt/
+ 9 
+10   tasks:
+11     - name: Install jdk1.8
+12       yum:
+13         name: java-1.8.0-openjdk
+14         state: present
+15     - name:  Download tomcat
+16       get_url:
+17         url: http://mirrors.hust.edu.cn/apache/tomcat/tomcat-8/v{{tomcat_version}}/bin/apache-tomcat-{{tomcat_version}}.tar.gz
+18         dest: /tmp
+19     - name:  Unarchive tomcat
+20       unarchive:
+21         src: /tmp/apache-tomcat-{{tomcat_version}}.tar.gz
+22         dest: "{{tomcat_install_dir}}/"
+23         copy: no
+24     - name: Start tomcat
+25       shell: cd {{tomcat_install_dir}} && mv apache-tomcat-{{tomcat_version}}  tomcat8  && cd tomcat8/bin && nohup ./startup.sh &
